@@ -1,0 +1,87 @@
+@font-face {
+    font-family: "ArchivoBlack-Regular";
+    src: url("/style/fonts/ArchivoBlack-Regular.ttf");
+    font-style: "bold";
+}
+
+@font-face {
+    font-family: "ArchivoNarrow-Regular";
+    src: url("/style/fonts/ArchivoNarrow-Regular.ttf");
+    font-style: "normal";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+$med-blue: #51A5CB;
+$gray: #939199;
+$transparent-gray: rgba(147, 145, 153, 0.6);
+
+html {
+  height: 100vh;
+}
+
+body {
+  font-family: "ArchivoNarrow-Regular", "sans-serif";
+  font-size: 18px;
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+  font-family: "ArchivoBlack-Regular";
+  color: $med-blue;
+}
+
+a::after {
+  content: '->';
+  color: white;
+}
+
+a:hover::after {
+  content: '->';
+  color: $med-blue;
+}
+
+h1, strong {
+  font-weight: 500;
+  font-family: "ArchivoBlack-Regular";
+}
+
+#main {
+  min-height: 100%;
+}
+
+#content {
+  display: flex;
+  margin: 2rem 0 0 0;
+  justify-content: space-around;
+
+  .left-col {
+    margin: 4rem;
+    flex: 0 30%;
+  }
+
+  .right-col {
+    border: 1px solid $gray;
+    padding: 2rem 3rem;
+    flex: 1 50%;
+    margin: 4rem;
+    box-shadow: -12px 12px 2px $transparent-gray;
+  }
+}
+
+footer {
+  margin: 4rem 0 0 0;
+  height: 3.5rem;
+  padding: 2px 12px;
+  font-size: 85%;
+  background-color: $gray;
+  color: white;
+
+  p {
+    margin: 3px 0 0 0;
+  }
+}
+

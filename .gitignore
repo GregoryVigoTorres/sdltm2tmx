@@ -1,0 +1,8 @@
+*.tags
+*.pyc
+__pycache__
+*.sdltm
+*.pyc
+__pycache__
+*.sass-cache
+*.css.map
