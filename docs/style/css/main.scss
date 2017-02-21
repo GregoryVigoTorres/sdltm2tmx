@@ -72,6 +72,25 @@ h1, strong {
   }
 }
 
+@media screen and (max-width: 800px) {
+  #content {
+    flex-direction: column;
+    align-items: center;
+
+    .left-col, .right-col {
+      flex: 1 100%;
+      margin: 0;
+    }
+
+    .right-col {
+      margin-top: 3rem;
+      box-shadow: none;
+      border-left: none;
+      border-right: none;
+    }
+  }
+}
+
 footer {
   margin: 4rem 0 0 0;
   height: 3.5rem;
