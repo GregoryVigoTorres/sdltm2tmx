@@ -21,7 +21,7 @@ import os
 import sqlite3
 import xml.etree.ElementTree as ET
 
-from tmxlib import TmxWriter
+from .tmxlib import TmxWriter
 
 
 sdl_date_fmt = '%Y-%m-%d %H:%M:%S'
