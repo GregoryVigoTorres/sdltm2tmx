@@ -128,7 +128,6 @@ class TmxWriter():
                                   addindent=' ',
                                   newl='\n',
                                   encoding='UTF-8')
-                tm.close()
             return (True, None)
         except Exception as E:
             return (False, E)
