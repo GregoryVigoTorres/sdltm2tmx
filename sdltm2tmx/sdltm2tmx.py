@@ -143,8 +143,8 @@ def get_translation_memory_props(c):
 
 def run(src, tmx_save_root):
     tmx_save_root = tmx_save_root
-    print('opening tm: {}'.format(src))
 
+    print('opening tm: {}'.format(src))
     conn = sqlite3.connect(src)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
