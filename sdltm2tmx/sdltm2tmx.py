@@ -90,8 +90,11 @@ def get_segments(c, tmid=None):
     """
     list of lists of text content
     source, target
+
+    Get id for debugging
     """
     stmt = """SELECT
+                id,
                 source_segment,
                 target_segment,
                 creation_date,
