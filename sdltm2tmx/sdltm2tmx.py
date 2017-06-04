@@ -171,6 +171,7 @@ def run(src, tmx_save_root):
     if not success:
         print('Error saving {}'.format(save_path))
         print(reason)
+        conn.rollback()
     else:
         print('tmx saved to {}'.format(save_path))
 
