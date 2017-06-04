@@ -83,7 +83,9 @@ def gen_segs(qry):
     """
     for row in qry:
         seg = get_seg(row)
-        yield seg
+
+        if seg['source_segment'] and seg['target_segment']:
+            yield seg
 
 
 def get_segments(c, tmid=None):
