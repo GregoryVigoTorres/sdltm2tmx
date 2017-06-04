@@ -83,15 +83,20 @@ def gen_segs(qry):
     """
     for row in qry:
         seg = get_seg(row)
-        yield seg
+
+        if seg['source_segment'] and seg['target_segment']:
+            yield seg
 
 
 def get_segments(c, tmid=None):
     """
     list of lists of text content
     source, target
+
+    Get id for debugging
     """
     stmt = """SELECT
+                id,
                 source_segment,
                 target_segment,
                 creation_date,
@@ -142,6 +147,7 @@ def run(src, tmx_save_root):
     """
     src = src
     tmx_save_root = tmx_save_root
+    print('opening tm: {}'.format(src))
 
     conn = sqlite3.connect(src)
     conn.row_factory = sqlite3.Row
