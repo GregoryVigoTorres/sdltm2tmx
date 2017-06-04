@@ -142,10 +142,6 @@ def get_translation_memory_props(c):
 
 
 def run(src, tmx_save_root):
-    """
-    src is path to sdltm file
-    """
-    src = src
     tmx_save_root = tmx_save_root
     print('opening tm: {}'.format(src))
 
