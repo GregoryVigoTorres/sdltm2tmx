@@ -20,6 +20,7 @@ import re
 import os
 import sqlite3
 import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import ParseError
 
 from .tmxlib import TmxWriter
 
@@ -30,14 +31,31 @@ src = ''
 tmx_save_root = ''
 
 
+def get_invalid_characters(seg):
+    chars = ''
+    for i in seg:
+        if i == '<':
+            return chars
+        chars += i
+
+
 def parse_tu(seg):
     """
     parse translation segment XML
+
+    Segments that cannot be parsed are skipped
+    and an error is logged.
     """
-    line = ET.fromstring(seg)
-    for i in line.iter():
-        if i.tag.lower() == 'value':
-            return re.sub('\s+', ' ', i.text)
+    try:
+        line = ET.fromstring(seg)
+        for i in line.iter():
+            if i.tag.lower() == 'value':
+                return re.sub('\s+', ' ', i.text)
+    except ParseError as E:
+        print(E.msg)
+        bad_chars = get_invalid_characters(seg[E.position[1]:])
+        print('Invalid characters: {0}\n'.format(bad_chars))
+        return
 
 
 def fmt_date(date_str):
