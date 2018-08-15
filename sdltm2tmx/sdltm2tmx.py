@@ -1,5 +1,5 @@
 """
-Copyright (C) 2017 Gregory Vigo Torres
+Copyright (C) 2018 Gregory Vigo Torres
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,63 +14,46 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see http://www.gnu.org/licenses/.
 """
-
-from datetime import datetime
-import re
+import logging
 import os
+import re
 import sqlite3
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import ParseError
+from datetime import datetime
+from xml.etree import ElementTree as ET
 
-from .tmxlib import TmxWriter
+from sdltm2tmx.config import (
+    ISO_8601_FMT,
+    SDL_DATE_FMT
+)
+from sdltm2tmx.db import session
+from tmx_writer import TmxWriter
 
 
-sdl_date_fmt = '%Y-%m-%d %H:%M:%S'
-iso_8601 = '%Y%m%dT%H%M%SZ'
-src = ''
-tmx_save_root = ''
-
-
-def get_invalid_characters(seg):
-    chars = ''
-    for i in seg:
-        if i == '<':
-            return chars
-        chars += i
+log = logging.getLogger(__name__)
 
 
 def parse_tu(seg):
     """
-    parse translation segment XML
-
-    Segments that cannot be parsed are skipped
-    and an error is logged.
+    Parse translation segment XML and return segment text
+    Invalid segments are logged & discarded
+    The error message doesn't show the right position, but it's not my fault
     """
     try:
         line = ET.fromstring(seg)
-        for i in line.iter():
-            if i.tag.lower() == 'value':
-                return re.sub('\s+', ' ', i.text)
-    except ParseError as E:
-        print(E.msg)
-        bad_chars = get_invalid_characters(seg[E.position[1]:])
-        print('Invalid characters: {0}\n'.format(bad_chars))
-        return
+        return line.findtext('.//Value') or line.findtext('.//value')
+    except ET.ParseError as E:
+        log.error(seg)
+        log.error(E.msg)
 
 
 def fmt_date(date_str):
     """
     tmx dates should be in ISO 8601 format
-    YYYYMMDDThhmmssZ
-
-    original format is like:
+    sdltm date format is like:
     2017-02-07 07:38:21
-
-    strptime -> date obj
-    strftime -> str
     """
-    od = datetime.strptime(date_str, sdl_date_fmt)
-    iso_date = datetime.strftime(od, iso_8601)
+    od = datetime.strptime(date_str, SDL_DATE_FMT)
+    iso_date = datetime.strftime(od, ISO_8601_FMT)
     return iso_date
 
 
@@ -159,38 +142,42 @@ def get_translation_memory_props(c):
     return props
 
 
-def run(src, tmx_save_root):
-    tmx_save_root = tmx_save_root
-
-    print('opening tm: {}'.format(src))
-    conn = sqlite3.connect(src)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-
-    tm_props = get_translation_memory_props(c)
-    props = {k: tm_props[k] for k in tm_props.keys()}
-    tm_id = props.get('id')
-    segments = get_segments(c, tmid=tm_id)
-
-    print('generating tmx...')
-    writer = TmxWriter(props, segments)
+def get_tm_path(props, tmx_save_root):
     tm_name = props.get('name')
 
     if not tm_name:
         tm_name = 'sdltm2tmx'
     else:
         tm_name = re.sub('\s', '_', tm_name)
-        tm_name = tm_name.replace('/', '')
+        tm_name = tm_name.replace('/', '.')
 
-    save_path = os.path.join(tmx_save_root, tm_name)
-    save_path += '.tmx'
+    if not tm_name.endswith('.tmx'):
+        tm_name += '.tmx'
+
+    return os.path.join(tmx_save_root, tm_name)
+
+
+def run(src, tmx_save_root):
+    log.info('opening tm: {}'.format(src))
+    with session(src) as c:
+        tm_props = get_translation_memory_props(c)
+        props = {k: tm_props[k] for k in tm_props.keys()}
+        tm_id = props.get('id')
+
+        segments = get_segments(c, tmid=tm_id)
+
+    hdr_attrs = {'srclang': props.get('source_lanuguage')}
+    tm_attrs = {'source_language':props.get('source_language'),
+                'target_language':props.get('target_language')}
+
+    writer = TmxWriter(tmx_attrs=tm_attrs, header_attrs=hdr_attrs)
+    writer.feed(segments)
+
+    save_path = get_tm_path(props, tmx_save_root)
     success, reason = writer.save(save_path)
 
     if not success:
-        print('Error saving {}'.format(save_path))
-        print(reason)
-        conn.rollback()
+        log.error('Error saving {}'.format(save_path))
+        log.error(reason)
     else:
-        print('tmx saved to {}'.format(save_path))
-
-    conn.close()
+        log.info('tmx saved to {}'.format(save_path))
