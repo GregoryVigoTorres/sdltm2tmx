@@ -1,28 +1,27 @@
 # sdltm2tmx
 
-This is a rather simple script to convert an sdltm translation memory into a tmx1.4 translation memory, in particular for use with OmegaT.
+This is a command line utility and library for converting sdltm translation memories into tmx 1.4 memories.
 
-I can't guarantee this will work with every sdltm. This is a beta release, because I haven't totally reverse engineered the sdltm yet. Any issues will hopefully be resolved in later versions.
+I can't guarantee it works with every sdltm translation memory.
+Please submit a bug report if you have issues.
 
 
 ## Installation
-**sdltm2tmx** has no dependencies.
-It's been tested with Python 3.6, but it should work with any Python 3 version.
-It can be installed with `python3 setup.py install`.
+Requires Python3
+Tested with Python 3.6 and 3.7, but most likely compatible with Python 3.3 or later.
+Depends on tmx-writer, which can be found at [https://gitlab.com/grgvt/tmx_writer.git](https://gitlab.com/grgvt/tmx_writer.git).
+Install with `python3 setup.py`
 
 
 ## Usage:
 cli:
-To run the command line application run `sdltm2tmx-cli`.
-Paths are either absolute or relative to the current directory.
+To use the command line application run `sdltm2tmx $SDLTM_PATH (optional)$SAVE_DIR`.
+Paths are either absolute or relative to the current directory. The default save directory is the current working directory.
 
-For use as a library in other programs, call the run function of sdltm2tmx with the path to the sdltm file and the root path where you want to save the tmx.
+sdltm2tmx can also be used as a library. The `run` function is the main entry point.
 
-
-## ToDo:
-* gui interface
-* optimization may be necessary to handle really large TMs
+Segments with invalid XML are logged and skipped.
 
 
 License GPL v.3
-Copyright 2017, Gregory Vigo Torres
+Copyright (c) 2017, 2018 Gregory Vigo Torres
