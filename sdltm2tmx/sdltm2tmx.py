@@ -1,5 +1,5 @@
 """
-Copyright (C) 2018 Gregory Vigo Torres
+Copyright (C) 2018/2019 Gregory Vigo Torres
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see http://www.gnu.org/licenses/.
 """
-from io import BytesIO
 import logging
 import os
 import re
@@ -38,7 +37,7 @@ log = logging.getLogger(__name__)
 class TmxConverter():
     def __init__(self, sdltm=None):
         self.src = sdltm
-        self.get_tm_props()
+        self.tm_attrs = self.get_tm_meta()
         self.header_attrs = HEADER_ATTRS
         self.header_attrs['srclang'] = self.tm_attrs.get('source_language')
         self.header_attrs['o-tmf'] = os.path.basename(self.src)
@@ -46,13 +45,13 @@ class TmxConverter():
         # segments is a generator
         self.segments = self.get_segments()
 
-    def get_tm_props(self):
+    def get_tm_meta(self):
         with session(self.src) as c:
-            tm_props = self.get_translation_memory_props(c)
-            self.tm_attrs = {k: tm_props[k] for k in tm_props.keys()}
+            tm_props = self.query_tm_meta(c)
+            return {k: tm_props[k] for k in tm_props.keys()}
 
     # rename this
-    def get_translation_memory_props(self, c):
+    def query_tm_meta(self, c):
         """
         c is the db cursor.
 
@@ -199,7 +198,9 @@ def get_tm_path(props, tmx_save_root):
         tm_name = 'sdltm2tmx'
     else:
         tm_name = re.sub('\s', '_', tm_name)
+        tm_name = tm_name.replace('.', '')
         tm_name = tm_name.replace('/', '.')
+        tm_name = tm_name.lower()
 
     if not tm_name.endswith('.tmx'):
         tm_name += '.tmx'
@@ -210,19 +211,12 @@ def get_tm_path(props, tmx_save_root):
 def run(src, tmx_save_root):
     log.info('opening tm: {}'.format(src))
     converter = TmxConverter(sdltm=src)
-    # write segments to tm with incremental writer
-    # get header and tm attrs
-    log.info(converter.segments)
-    log.info(converter.header_attrs)
-    _tmx = BytesIO()
-    w = writer(_tmx)
-
-    return
-    # save_path = get_tm_path(props, tmx_save_root)
-    # success, reason = writer.save(save_path)
-
-    # if not success:
-    #     log.error('Error saving {}'.format(save_path))
-    #     log.error(reason)
-    # else:
-    #     log.info('tmx saved to {}'.format(save_path))
+    dest_path = get_tm_path(converter.tm_attrs, tmx_save_root)
+    log.info(dest_path)
+    with open(dest_path, mode='wb') as _tmx:
+        w = writer(_tmx, header_attrs=converter.header_attrs)
+        next(w)
+        for seg in converter.segments:
+            w.send(seg)
+        w.close()
+        log.info('done converting tmx')
