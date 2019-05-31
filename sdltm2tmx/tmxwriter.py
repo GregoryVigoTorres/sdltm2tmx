@@ -33,11 +33,6 @@ def mk_doctype():
     return tmxdoctype.toxml()
 
 
-# def mk_header(header_attrs):
-#     hdr_el = etree.Element('header', **header_attrs)
-#     return hdr_el
-
-
 def writer(dest, header_attrs={}):
     """
     Incremental XML writer
@@ -57,4 +52,3 @@ def writer(dest, header_attrs={}):
                         el = None
                 except GeneratorExit:
                     pass
-
