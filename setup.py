@@ -14,8 +14,8 @@ setup(
     keywords='translation localization',
     packages=find_packages(),
     install_requires=[
-        'tmx-writer==1.1',
-        'click'
+        'click',
+        'lxml'
     ],
     dependency_links=[
         'git+https://gitlab.com/grgvt/tmx_writer.git#egg=tmx-writer-1.1',
