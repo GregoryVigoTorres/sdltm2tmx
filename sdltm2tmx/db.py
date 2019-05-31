@@ -22,4 +22,3 @@ def session(src):
         if conn:
             # log.info('db connection closed')
             conn.close()
-
