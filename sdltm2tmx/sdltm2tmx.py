@@ -136,6 +136,8 @@ class TmxConverter():
         orig_tu is a query result consisting of xml containing source and target text
         Dates are reformatted to ISO 8601, per tmx standard
         Returns a list of dicts
+
+        DETECT INVALID SEGMENTS
         """
         row = orig_tu
         orig_tu = dict(orig_tu)
@@ -144,15 +146,25 @@ class TmxConverter():
         for k in keys:
             if 'segment' in k:
                 tuv = orig_tu.pop(k)
-                tuv = self.parse_orig_tuv(tuv)
-                if tuv.get('lang') != self.srclang:
-                    # add other attrs to non-source segment
-                    tuv['creationdate'] = self.fmt_date(orig_tu.get('creation_date'))
-                    tuv['changedate'] = self.fmt_date(orig_tu.get('change_date'))
-                    tuv['creationid'] = orig_tu.get('creation_user')
-                    tuv['changeid'] = orig_tu.get('change_user')
-                tus.append(tuv)
-        return tus
+                try:
+                    tuv = self.parse_orig_tuv(tuv)
+                    if tuv.get('lang') != self.srclang:
+                        # add other attrs to non-source segment
+                        tuv['creationdate'] = self.fmt_date(orig_tu.get('creation_date'))
+                        tuv['changedate'] = self.fmt_date(orig_tu.get('change_date'))
+                        tuv['creationid'] = orig_tu.get('creation_user')
+                        tuv['changeid'] = orig_tu.get('change_user')
+                    tus.append(tuv)
+                except Exception as E:
+                    log.error(E)
+                    log.error(tuv)
+
+        if len(tus) >= 2:
+            return tus
+        else:
+            log.error('Error parsing original segments')
+        return []
+
 
     def fmt_date(self, date_str):
         """
