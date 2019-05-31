@@ -17,7 +17,6 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 import logging
 import os
 import re
-import sqlite3
 from datetime import datetime
 
 from lxml import etree
@@ -133,13 +132,11 @@ class TmxConverter():
 
     def get_tu_data(self, orig_tu):
         """
-        orig_tu is a query result consisting of xml containing source and target text
+        orig_tu is a query result consisting of xml
+        containing source and target text
         Dates are reformatted to ISO 8601, per tmx standard
         Returns a list of dicts
-
-        DETECT INVALID SEGMENTS
         """
-        row = orig_tu
         orig_tu = dict(orig_tu)
         tus = []
         keys = list(orig_tu.keys())
@@ -150,8 +147,10 @@ class TmxConverter():
                     tuv = self.parse_orig_tuv(tuv)
                     if tuv.get('lang') != self.srclang:
                         # add other attrs to non-source segment
-                        tuv['creationdate'] = self.fmt_date(orig_tu.get('creation_date'))
-                        tuv['changedate'] = self.fmt_date(orig_tu.get('change_date'))
+                        cdate = orig_tu.get('creation_date')
+                        tuv['creationdate'] = self.fmt_date(cdate)
+                        cdate = orig_tu.get('change_date')
+                        tuv['changedate'] = self.fmt_date(cdate)
                         tuv['creationid'] = orig_tu.get('creation_user')
                         tuv['changeid'] = orig_tu.get('change_user')
                     tus.append(tuv)
@@ -164,7 +163,6 @@ class TmxConverter():
         else:
             log.error('Error parsing original segments')
         return []
-
 
     def fmt_date(self, date_str):
         """
@@ -182,7 +180,7 @@ class TmxConverter():
         """
         seg_text = tuv_data.pop('seg')
         lang = tuv_data.pop('lang')
-        tuv_attrs = {'lang': lang }
+        tuv_attrs = {'lang': lang}
         if lang != self.srclang:
             tuv_attrs.update(tuv_data)
         tuv = etree.SubElement(parent, 'tuv', **tuv_attrs)
@@ -197,7 +195,6 @@ class TmxConverter():
         for tuv_data in tu_data:
             self.mk_tuv_elem(tu, tuv_data)
         return tu
-
 
 
 def get_tm_path(props, tmx_save_root):
