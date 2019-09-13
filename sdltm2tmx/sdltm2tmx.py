@@ -132,7 +132,11 @@ class TmxConverter():
                     _tuv['lang'] = elem.text
             return _tuv
         except Exception as E:
-            log.error(E)
+            if len(self.xml_parser.error_log):
+                for err in self.xml_parser.error_log:
+                    log.error(err.message)
+                    log.error(f'at line: {err.line} col: {err.column} offending char: "{repr(tuv[err.column])}"')
+                    log.error(repr(tuv))
 
     def get_tu_data(self, orig_tu):
         """
