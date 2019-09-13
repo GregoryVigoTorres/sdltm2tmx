@@ -36,6 +36,7 @@ log = logging.getLogger(__name__)
 class TmxConverter():
     def __init__(self, sdltm=None):
         self.src = sdltm
+        self.xml_parser = etree.XMLParser()
         self.tm_attrs = self.get_tm_meta()
         self.header_attrs = HEADER_ATTRS
         self.header_attrs['srclang'] = self.tm_attrs.get('source_language')
@@ -111,8 +112,11 @@ class TmxConverter():
         """
         for row in qry:
             tu_data = self.get_tu_data(row)
+            if not tu_data:
+                continue
             el = self.mk_tu_elem(tu_data)
-            yield el
+            if el is not None:
+                yield el
 
     def parse_orig_tuv(self, tuv):
         """
@@ -120,7 +124,7 @@ class TmxConverter():
         """
         _tuv = {}
         try:
-            seg_elem = etree.fromstring(tuv)
+            seg_elem = etree.fromstring(tuv, self.xml_parser)
             for elem in seg_elem.iter():
                 if elem.tag.lower() == 'value':
                     _tuv['seg'] = ''.join(elem.itertext())
@@ -145,6 +149,8 @@ class TmxConverter():
                 tuv = orig_tu.pop(k)
                 try:
                     tuv = self.parse_orig_tuv(tuv)
+                    if not tuv:
+                        return
                     if tuv.get('lang') != self.srclang:
                         # add other attrs to non-source segment
                         cdate = orig_tu.get('creation_date')
