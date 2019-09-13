@@ -240,7 +240,11 @@ def run(src, tmx_save_root):
     with open(dest_path, mode='wb') as _tmx:
         w = writer(_tmx, header_attrs=converter.header_attrs)
         next(w)
-        for seg in converter.segments:
-            w.send(seg)
-        w.close()
+        try:
+            for seg in converter.segments:
+                w.send(seg)
+        except Exception as E:
+            log.error(E)
+        finally:
+            w.close()
         log.info('done converting tmx')
