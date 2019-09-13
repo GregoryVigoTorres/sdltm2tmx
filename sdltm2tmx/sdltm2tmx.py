@@ -188,14 +188,17 @@ class TmxConverter():
         """
         Also generates seg element children
         """
+        if tuv_data.get('seg') is None:
+            return
         seg_text = tuv_data.pop('seg')
         lang = tuv_data.pop('lang')
         tuv_attrs = {'lang': lang}
         if lang != self.srclang:
             tuv_attrs.update(tuv_data)
-        tuv = etree.SubElement(parent, 'tuv', **tuv_attrs)
-        seg = etree.SubElement(tuv, 'seg')
-        seg.text = seg_text
+        if seg_text and lang:
+            tuv = etree.SubElement(parent, 'tuv', **tuv_attrs)
+            seg = etree.SubElement(tuv, 'seg')
+            seg.text = seg_text
 
     def mk_tu_elem(self, tu_data):
         """
@@ -203,7 +206,9 @@ class TmxConverter():
         """
         tu = etree.Element('tu')
         for tuv_data in tu_data:
-            self.mk_tuv_elem(tu, tuv_data)
+            tuv = self.mk_tuv_elem(tu, tuv_data)
+            if tuv is None:
+                return
         return tu
 
 
