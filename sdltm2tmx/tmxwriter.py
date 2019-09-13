@@ -51,4 +51,7 @@ def writer(dest, header_attrs={}):
                         tmx.flush()
                         el = None
                 except GeneratorExit:
+                    log.info('writer closed')
                     pass
+                except Exception as E:
+                    log.error(E)
