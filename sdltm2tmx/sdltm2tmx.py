@@ -36,7 +36,9 @@ log = logging.getLogger(__name__)
 class TmxConverter():
     def __init__(self, sdltm=None):
         self.src = sdltm
-        self.xml_parser = etree.XMLParser()
+        self.xml_parser = etree.XMLParser(remove_blank_text=True,
+                                         recover=True)
+        self.tar_seg_count = 0
         self.tm_attrs = self.get_tm_meta()
         self.header_attrs = HEADER_ATTRS
         self.header_attrs['srclang'] = self.tm_attrs.get('source_language')
@@ -113,6 +115,7 @@ class TmxConverter():
         for row in qry:
             tu_data = self.get_tu_data(row)
             if not tu_data:
+                log.error('tu data is None!')
                 continue
             el = self.mk_tu_elem(tu_data)
             if el is not None:
@@ -136,7 +139,6 @@ class TmxConverter():
                 for err in self.xml_parser.error_log:
                     log.error(err.message)
                     log.error(f'at line: {err.line} col: {err.column} offending char: "{repr(tuv[err.column])}"')
-                    log.error(repr(tuv))
 
     def get_tu_data(self, orig_tu):
         """
@@ -151,6 +153,7 @@ class TmxConverter():
         for k in keys:
             if 'segment' in k:
                 tuv = orig_tu.pop(k)
+                # tuv is a string of XML
                 try:
                     tuv = self.parse_orig_tuv(tuv)
                     if not tuv:
@@ -163,10 +166,12 @@ class TmxConverter():
                         tuv['changedate'] = self.fmt_date(cdate)
                         tuv['creationid'] = orig_tu.get('creation_user')
                         tuv['changeid'] = orig_tu.get('change_user')
+                    # else:
+                    #     log.error(f"tuvlang: {tuv.get('lang')} srclang: {self.srclang}")
                     tus.append(tuv)
                 except Exception as E:
                     log.error(E)
-                    log.error(tuv)
+                    log.error(etree.tostring(tuv, pretty_print=True))
 
         if len(tus) >= 2:
             return tus
@@ -206,9 +211,7 @@ class TmxConverter():
         """
         tu = etree.Element('tu')
         for tuv_data in tu_data:
-            tuv = self.mk_tuv_elem(tu, tuv_data)
-            if tuv is None:
-                return
+            self.mk_tuv_elem(tu, tuv_data)
         return tu
 
 
@@ -239,6 +242,7 @@ def run(src, tmx_save_root):
     log.info(dest_path)
     with open(dest_path, mode='wb') as _tmx:
         w = writer(_tmx, header_attrs=converter.header_attrs)
+        # log.error(converter.tar_seg_count)
         next(w)
         try:
             for seg in converter.segments:
