@@ -242,13 +242,15 @@ def run(src, tmx_save_root):
     log.info(dest_path)
     with open(dest_path, mode='wb') as _tmx:
         w = writer(_tmx, header_attrs=converter.header_attrs)
-        # log.error(converter.tar_seg_count)
         next(w)
         try:
             for seg in converter.segments:
                 w.send(seg)
+                converter.tar_seg_count += 1
         except Exception as E:
             log.error(E)
         finally:
             w.close()
-        log.info('done converting tmx')
+        if converter.tar_seg_count < 1:
+            log.error('The converted TMX has no segments')
+        log.info(f'done converting {converter.tar_seg_count} segments')
