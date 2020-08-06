@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
 
+VERSION = '2.0'
+
 setup(
     name='sdltm2tmx',
-    version='1.0',
+    version=VERSION,
     description='convert sdltm translation memories to tmx1.4',
     author='Gregory Vigo Torres',
     license='gplv3',
@@ -16,9 +18,6 @@ setup(
     install_requires=[
         'click',
         'lxml'
-    ],
-    dependency_links=[
-        'git+https://gitlab.com/grgvt/tmx_writer.git#egg=tmx-writer-1.1',
     ],
     entry_points={
         'console_scripts': [

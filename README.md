@@ -8,7 +8,7 @@ Please submit a bug report if you have issues.
 
 ## Installation
 Requires Python 3
-Tested with Python 3.6 and 3.7, but most likely compatible with Python 3.3 or later.
+Tested with Python 3.6, 3.7 and 3.8, but most likely compatible with Python 3.3 or later.
 Install with `python3 setup.py` or `cd` into directory with `setup.py` and run `pip install .`
 
 
