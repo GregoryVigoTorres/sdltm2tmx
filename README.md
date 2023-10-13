@@ -1,3 +1,6 @@
+# This repo has been moved to gitlab
+# https://gitlab.com/grgvt/sdltm2tmx
+
 # sdltm2tmx
 
 This is a command line utility and library for converting sdltm translation memories into tmx 1.4 memories.
